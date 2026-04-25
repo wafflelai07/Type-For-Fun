@@ -60,6 +60,11 @@ Test your typing speed, accuracy, and time performance in a clean and minimal in
         content:
           "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/201b1b67-b43d-483e-9a22-6fbf8b61cf79/id-preview-02faf1c2--0a09e8dc-571f-4b34-9bc9-db1945289bd2.lovable.app-1777111548657.png",
       },
+      { name: "description", content: "Type For Fun is a web application for practicing typing skills with timed challenges." },
+      { property: "og:description", content: "Type For Fun is a web application for practicing typing skills with timed challenges." },
+      { name: "twitter:description", content: "Type For Fun is a web application for practicing typing skills with timed challenges." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6359df00-df9b-4d5d-8344-a37de5d90671/id-preview-32e715e0--0a09e8dc-571f-4b34-9bc9-db1945289bd2.lovable.app-1777112118209.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6359df00-df9b-4d5d-8344-a37de5d90671/id-preview-32e715e0--0a09e8dc-571f-4b34-9bc9-db1945289bd2.lovable.app-1777112118209.png" },
     ],
     links: [
       {
