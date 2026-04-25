@@ -55,6 +55,14 @@ function Index() {
   const [totalKeystrokes, setTotalKeystrokes] = useState(0);
   const [errorKeystrokes, setErrorKeystrokes] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
+
+  function focusInput() {
+    // Focus hidden input on mobile to bring up the on-screen keyboard,
+    // and the visible box on desktop for keydown handling.
+    hiddenInputRef.current?.focus();
+    boxRef.current?.focus();
+  }
 
   // Pick a random sentence only on the client after hydration.
   useEffect(() => {
