@@ -70,7 +70,7 @@ function Index() {
   }, []);
 
   useEffect(() => {
-    boxRef.current?.focus();
+    focusInput();
   }, [sentence]);
 
   // Countdown
