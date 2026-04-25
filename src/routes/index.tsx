@@ -152,7 +152,59 @@ function Index() {
     }
   }
 
-  function handleRetry() {
+  // Process a single typed character — shared by desktop keydown and mobile input events.
+  function processChar(char: string) {
+    if (results) return;
+    if (input.length >= sentence.length) return;
+
+    const nextInput = input + char;
+    const expected = sentence[input.length];
+    const isError = char !== expected;
+
+    let start = startTime;
+    if (start === null) {
+      start = Date.now();
+      setStartTime(start);
+    }
+
+    const nextTotal = totalKeystrokes + 1;
+    const nextErrors = errorKeystrokes + (isError ? 1 : 0);
+
+    setInput(nextInput);
+    setTotalKeystrokes(nextTotal);
+    setErrorKeystrokes(nextErrors);
+
+    if (nextInput === sentence) {
+      finish(nextInput, start, nextTotal, nextErrors);
+    }
+  }
+
+  function processBackspace() {
+    if (results) return;
+    if (input.length === 0) return;
+    setInput(input.slice(0, -1));
+  }
+
+  // Mobile: handle input events from the hidden input. We keep the input
+  // value empty after every event and read what was typed/deleted via inputType.
+  function handleHiddenBeforeInput(e: React.FormEvent<HTMLInputElement>) {
+    const ev = e.nativeEvent as InputEvent;
+    if (ev.inputType === "deleteContentBackward") {
+      e.preventDefault();
+      processBackspace();
+      return;
+    }
+    if (ev.inputType === "insertText" && ev.data) {
+      e.preventDefault();
+      // A single insertText may contain multiple chars (e.g. autocomplete); feed each.
+      for (const ch of ev.data) processChar(ch);
+      return;
+    }
+    // Block other input types (paste, compose, etc.) to keep accuracy honest.
+    if (ev.inputType !== "insertCompositionText") {
+      e.preventDefault();
+    }
+  }
     setSentence((prev) => pickRandomSentence(prev));
     setInput("");
     setStartTime(null);
