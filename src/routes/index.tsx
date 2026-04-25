@@ -176,11 +176,14 @@ function Index() {
   const isDone = !!results;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <main className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-2xl">
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Typing Practice
+            Typing For Fun
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Click the box and start typing the sentence below.
