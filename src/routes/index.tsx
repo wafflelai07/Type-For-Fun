@@ -55,6 +55,14 @@ function Index() {
   const [totalKeystrokes, setTotalKeystrokes] = useState(0);
   const [errorKeystrokes, setErrorKeystrokes] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
+
+  function focusInput() {
+    // Focus hidden input on mobile to bring up the on-screen keyboard,
+    // and the visible box on desktop for keydown handling.
+    hiddenInputRef.current?.focus();
+    boxRef.current?.focus();
+  }
 
   // Pick a random sentence only on the client after hydration.
   useEffect(() => {
@@ -62,7 +70,7 @@ function Index() {
   }, []);
 
   useEffect(() => {
-    boxRef.current?.focus();
+    focusInput();
   }, [sentence]);
 
   // Countdown
@@ -144,6 +152,60 @@ function Index() {
     }
   }
 
+  // Process a single typed character — shared by desktop keydown and mobile input events.
+  function processChar(char: string) {
+    if (results) return;
+    if (input.length >= sentence.length) return;
+
+    const nextInput = input + char;
+    const expected = sentence[input.length];
+    const isError = char !== expected;
+
+    let start = startTime;
+    if (start === null) {
+      start = Date.now();
+      setStartTime(start);
+    }
+
+    const nextTotal = totalKeystrokes + 1;
+    const nextErrors = errorKeystrokes + (isError ? 1 : 0);
+
+    setInput(nextInput);
+    setTotalKeystrokes(nextTotal);
+    setErrorKeystrokes(nextErrors);
+
+    if (nextInput === sentence) {
+      finish(nextInput, start, nextTotal, nextErrors);
+    }
+  }
+
+  function processBackspace() {
+    if (results) return;
+    if (input.length === 0) return;
+    setInput(input.slice(0, -1));
+  }
+
+  // Mobile: handle input events from the hidden input. We keep the input
+  // value empty after every event and read what was typed/deleted via inputType.
+  function handleHiddenBeforeInput(e: React.FormEvent<HTMLInputElement>) {
+    const ev = e.nativeEvent as InputEvent;
+    if (ev.inputType === "deleteContentBackward") {
+      e.preventDefault();
+      processBackspace();
+      return;
+    }
+    if (ev.inputType === "insertText" && ev.data) {
+      e.preventDefault();
+      // A single insertText may contain multiple chars (e.g. autocomplete); feed each.
+      for (const ch of ev.data) processChar(ch);
+      return;
+    }
+    // Block other input types (paste, compose, etc.) to keep accuracy honest.
+    if (ev.inputType !== "insertCompositionText") {
+      e.preventDefault();
+    }
+  }
+
   function handleRetry() {
     setSentence((prev) => pickRandomSentence(prev));
     setInput("");
@@ -211,10 +273,30 @@ function Index() {
           role="textbox"
           aria-label="Typing area"
           onKeyDown={handleKeyDown}
-          onClick={() => boxRef.current?.focus()}
+          onClick={focusInput}
+          onTouchStart={focusInput}
           className="rounded-lg bg-muted p-6 text-lg leading-relaxed font-mono tracking-wide outline-none cursor-text transition-all focus:ring-2 focus:ring-ring/40 focus:bg-muted/80 select-none"
         >
           {renderedSentence}
+          {/* Hidden input drives the on-screen keyboard on mobile devices. */}
+          <input
+            ref={hiddenInputRef}
+            type="text"
+            value=""
+            onChange={() => {
+              /* Value is controlled to "" — actual typing handled in onBeforeInput. */
+            }}
+            onBeforeInput={handleHiddenBeforeInput}
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck={false}
+            aria-hidden="true"
+            tabIndex={-1}
+            className="absolute h-px w-px opacity-0 pointer-events-none"
+            style={{ left: "-9999px" }}
+            disabled={isDone}
+          />
         </div>
 
         {!isDone && startTime === null && (
