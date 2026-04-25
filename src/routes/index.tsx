@@ -205,6 +205,8 @@ function Index() {
       e.preventDefault();
     }
   }
+
+  function handleRetry() {
     setSentence((prev) => pickRandomSentence(prev));
     setInput("");
     setStartTime(null);
