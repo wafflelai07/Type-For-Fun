@@ -30,15 +30,18 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Type For Fun" },
-      { name: "description", content: "It is a simple typing practice website built for fun. Test your typing speed, accuracy, and time performance in a clean and minimal interface." },
+      { name: "description", content: "It is a simple typing practice website built for fun.
+Test your typing speed, accuracy, and time performance in a clean and minimal interface." },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Type For Fun" },
-      { property: "og:description", content: "It is a simple typing practice website built for fun. Test your typing speed, accuracy, and time performance in a clean and minimal interface." },
+      { property: "og:description", content: "It is a simple typing practice website built for fun.
+Test your typing speed, accuracy, and time performance in a clean and minimal interface." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Type For Fun" },
-      { name: "twitter:description", content: "It is a simple typing practice website built for fun. Test your typing speed, accuracy, and time performance in a clean and minimal interface." },
+      { name: "twitter:description", content: "It is a simple typing practice website built for fun.
+Test your typing speed, accuracy, and time performance in a clean and minimal interface." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ebfda316-269b-49ea-ba3d-04def0bb53b9/id-preview-2d63f798--0a09e8dc-571f-4b34-9bc9-db1945289bd2.lovable.app-1777107760963.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ebfda316-269b-49ea-ba3d-04def0bb53b9/id-preview-2d63f798--0a09e8dc-571f-4b34-9bc9-db1945289bd2.lovable.app-1777107760963.png" },
     ],
