@@ -273,10 +273,30 @@ function Index() {
           role="textbox"
           aria-label="Typing area"
           onKeyDown={handleKeyDown}
-          onClick={() => boxRef.current?.focus()}
+          onClick={focusInput}
+          onTouchStart={focusInput}
           className="rounded-lg bg-muted p-6 text-lg leading-relaxed font-mono tracking-wide outline-none cursor-text transition-all focus:ring-2 focus:ring-ring/40 focus:bg-muted/80 select-none"
         >
           {renderedSentence}
+          {/* Hidden input drives the on-screen keyboard on mobile devices. */}
+          <input
+            ref={hiddenInputRef}
+            type="text"
+            value=""
+            onChange={() => {
+              /* Value is controlled to "" — actual typing handled in onBeforeInput. */
+            }}
+            onBeforeInput={handleHiddenBeforeInput}
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck={false}
+            aria-hidden="true"
+            tabIndex={-1}
+            className="absolute h-px w-px opacity-0 pointer-events-none"
+            style={{ left: "-9999px" }}
+            disabled={isDone}
+          />
         </div>
 
         {!isDone && startTime === null && (
