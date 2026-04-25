@@ -50,6 +50,9 @@ function Index() {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const [results, setResults] = useState<Results | null>(null);
+  // Track every printable keystroke and how many were wrong at the moment they were typed.
+  const [totalKeystrokes, setTotalKeystrokes] = useState(0);
+  const [errorKeystrokes, setErrorKeystrokes] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
 
   // Pick a random sentence only on the client after hydration.
@@ -76,20 +79,18 @@ function Index() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startTime, input, results]);
 
-  function computeAccuracy(typed: string) {
-    if (typed.length === 0) return 0;
-    let correct = 0;
-    for (let i = 0; i < typed.length; i++) {
-      if (typed[i] === sentence[i]) correct++;
-    }
-    return (correct / typed.length) * 100;
-  }
-
-  function finish(typed: string, start: number, forcedSeconds?: number) {
+  function finish(
+    typed: string,
+    start: number,
+    total: number,
+    errors: number,
+    forcedSeconds?: number,
+  ) {
     const seconds = forcedSeconds ?? (Date.now() - start) / 1000;
     const minutes = seconds / 60;
     const wpm = minutes > 0 ? typed.length / 5 / minutes : 0;
-    const accuracy = computeAccuracy(typed);
+    // Accuracy now penalizes every wrong keystroke, even if later corrected.
+    const accuracy = total > 0 ? ((total - errors) / total) * 100 : 0;
     setResults({
       wpm: Math.round(wpm),
       seconds: Math.round(seconds * 10) / 10,
