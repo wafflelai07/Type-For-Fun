@@ -72,12 +72,12 @@ function Index() {
       const remaining = Math.max(0, TIME_LIMIT - elapsed);
       setTimeLeft(remaining);
       if (remaining <= 0) {
-        finish(input, startTime, TIME_LIMIT);
+        finish(input, startTime, totalKeystrokes, errorKeystrokes, TIME_LIMIT);
       }
     }, 100);
     return () => window.clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startTime, input, results]);
+  }, [startTime, input, results, totalKeystrokes, errorKeystrokes]);
 
   function finish(
     typed: string,
@@ -89,31 +89,13 @@ function Index() {
     const seconds = forcedSeconds ?? (Date.now() - start) / 1000;
     const minutes = seconds / 60;
     const wpm = minutes > 0 ? typed.length / 5 / minutes : 0;
-    // Accuracy now penalizes every wrong keystroke, even if later corrected.
+    // Accuracy penalizes every wrong keystroke, even if later corrected.
     const accuracy = total > 0 ? ((total - errors) / total) * 100 : 0;
     setResults({
       wpm: Math.round(wpm),
       seconds: Math.round(seconds * 10) / 10,
       accuracy: Math.round(accuracy * 10) / 10,
     });
-  }
-
-  function updateInput(value: string) {
-    if (results) return;
-    // Don't allow typing past the sentence length.
-    if (value.length > sentence.length) return;
-
-    let start = startTime;
-    if (start === null && value.length > 0) {
-      start = Date.now();
-      setStartTime(start);
-    }
-
-    setInput(value);
-
-    if (value === sentence && start !== null) {
-      finish(value, start);
-    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
@@ -124,14 +106,40 @@ function Index() {
 
     if (e.key === "Backspace") {
       e.preventDefault();
-      updateInput(input.slice(0, -1));
+      // Backspace edits the buffer but does NOT erase past errors from the count.
+      if (input.length === 0) return;
+      setInput(input.slice(0, -1));
       return;
     }
 
     // Single printable characters only
-    if (e.key.length === 1) {
-      e.preventDefault();
-      updateInput(input + e.key);
+    if (e.key.length !== 1) return;
+    e.preventDefault();
+
+    // Don't allow typing past the sentence length.
+    if (input.length >= sentence.length) return;
+
+    const char = e.key;
+    const nextInput = input + char;
+    const expected = sentence[input.length];
+    const isError = char !== expected;
+
+    // Start the timer on first keystroke.
+    let start = startTime;
+    if (start === null) {
+      start = Date.now();
+      setStartTime(start);
+    }
+
+    const nextTotal = totalKeystrokes + 1;
+    const nextErrors = errorKeystrokes + (isError ? 1 : 0);
+
+    setInput(nextInput);
+    setTotalKeystrokes(nextTotal);
+    setErrorKeystrokes(nextErrors);
+
+    if (nextInput === sentence) {
+      finish(nextInput, start, nextTotal, nextErrors);
     }
   }
 
@@ -141,6 +149,8 @@ function Index() {
     setStartTime(null);
     setTimeLeft(TIME_LIMIT);
     setResults(null);
+    setTotalKeystrokes(0);
+    setErrorKeystrokes(0);
   }
 
   const renderedSentence = useMemo(() => {
