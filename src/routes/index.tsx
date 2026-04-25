@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Typing Practice — Test Your Speed & Accuracy" },
+      { title: "Typing For Fun — Test Your Speed & Accuracy" },
       {
         name: "description",
         content:
@@ -18,16 +19,16 @@ export const Route = createFileRoute("/")({
 });
 
 const SENTENCES = [
-  "The quick brown fox jumps over the lazy dog.",
-  "Practice makes progress when you stay consistent every day.",
-  "Typing fast is useful but typing accurately is more important.",
-  "Small steps every day can lead to big achievements over time.",
-  "Stay focused and keep your hands steady on the keyboard.",
-  "Learning new skills takes patience and regular practice.",
-  "Keep going even when it feels slow at the beginning.",
-  "Consistency beats motivation when building good habits.",
-  "Focus on accuracy first before trying to increase your speed.",
-  "Every mistake is a chance to improve your typing skills.",
+  "Whenever the rain finally stops, I love stepping outside to smell the fresh, earthy air; it always reminds me of childhood weekends.",
+  "She packed her notebook, three pencils, a half-eaten sandwich, and an old map before quietly slipping out the back door at sunrise.",
+  "If you truly want to master something difficult, you must embrace the boring, repetitive practice that nobody on social media ever shows you.",
+  "The library was unusually crowded today: students whispered over textbooks, kids giggled in the corner, and someone's phone kept buzzing nonstop!",
+  "Don't underestimate the power of a good night's sleep — it sharpens your focus, balances your mood, and rebuilds your tired muscles.",
+  "Around 7:45 a.m., the bakery on 5th Street fills the entire block with the warm, irresistible scent of butter, sugar, and cinnamon.",
+  "Programming is mostly about reading code, debugging weird errors, and asking yourself, \"Why on earth did I write it this way?\"",
+  "Travelling alone teaches you patience, courage, and the strange comfort of eating dinner at a tiny restaurant without anyone to talk to.",
+  "He whispered, \"Are you sure about this?\" — but before I could reply, the door slammed shut and the lights went completely out.",
+  "Success isn't always loud; sometimes it's a quiet morning, a finished project, and the simple satisfaction of doing what you said you would.",
 ];
 
 const TIME_LIMIT = 60;
@@ -175,11 +176,14 @@ function Index() {
   const isDone = !!results;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <main className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-2xl">
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Typing Practice
+            Typing For Fun
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Click the box and start typing the sentence below.
