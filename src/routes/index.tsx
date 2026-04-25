@@ -44,15 +44,21 @@ type Results = {
 };
 
 function Index() {
-  const [sentence, setSentence] = useState(() => pickRandomSentence());
+  // Use a stable initial sentence for SSR; randomize after mount to avoid hydration mismatch.
+  const [sentence, setSentence] = useState(SENTENCES[0]);
   const [input, setInput] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const [results, setResults] = useState<Results | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  // Pick a random sentence only on the client after hydration.
+  useEffect(() => {
+    setSentence(pickRandomSentence());
+  }, []);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    boxRef.current?.focus();
   }, [sentence]);
 
   // Countdown
@@ -91,9 +97,10 @@ function Index() {
     });
   }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function updateInput(value: string) {
     if (results) return;
-    const value = e.target.value;
+    // Don't allow typing past the sentence length.
+    if (value.length > sentence.length) return;
 
     let start = startTime;
     if (start === null && value.length > 0) {
@@ -105,6 +112,25 @@ function Index() {
 
     if (value === sentence && start !== null) {
       finish(value, start);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (results) return;
+
+    // Allow standard browser shortcuts (copy, refresh, devtools, etc.)
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      updateInput(input.slice(0, -1));
+      return;
+    }
+
+    // Single printable characters only
+    if (e.key.length === 1) {
+      e.preventDefault();
+      updateInput(input + e.key);
     }
   }
 
@@ -122,15 +148,20 @@ function Index() {
       if (i < input.length) {
         cls = input[i] === char ? "text-foreground" : "text-destructive underline";
       }
+      const isCursor = i === input.length && !results;
       return (
-        <span key={i} className={cls}>
+        <span
+          key={i}
+          className={`${cls} ${isCursor ? "border-l-2 border-primary -ml-px animate-pulse" : ""}`}
+        >
           {char}
         </span>
       );
     });
-  }, [sentence, input]);
+  }, [sentence, input, results]);
 
   const timerDisplay = Math.ceil(timeLeft);
+  const isDone = !!results;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
@@ -140,7 +171,7 @@ function Index() {
             Typing Practice
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Type the sentence below as quickly and accurately as you can.
+            Click the box and start typing the sentence below.
           </p>
         </header>
 
@@ -159,23 +190,23 @@ function Index() {
           </span>
         </div>
 
-        <div className="rounded-lg bg-muted p-6 text-lg leading-relaxed font-mono tracking-wide">
+        <div
+          ref={boxRef}
+          tabIndex={0}
+          role="textbox"
+          aria-label="Typing area"
+          onKeyDown={handleKeyDown}
+          onClick={() => boxRef.current?.focus()}
+          className="rounded-lg bg-muted p-6 text-lg leading-relaxed font-mono tracking-wide outline-none cursor-text transition-all focus:ring-2 focus:ring-ring/40 focus:bg-muted/80 select-none"
+        >
           {renderedSentence}
         </div>
 
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={handleChange}
-          disabled={!!results}
-          placeholder="Start typing here..."
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-          className="mt-4 w-full rounded-lg border border-input bg-background px-4 py-3 text-base text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-60"
-        />
+        {!isDone && startTime === null && (
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            Click the box above and start typing to begin
+          </p>
+        )}
 
         {results && (
           <div className="mt-8">
